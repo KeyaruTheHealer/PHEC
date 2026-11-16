@@ -1,0 +1,2772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PHEC - Pre-hospital Emergency Care - Dashboard</title>
+    <style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+    color: #2d3748;
+    min-height: 100vh;
+}
+
+/* Navbar */
+.navbar {
+    background: linear-gradient(135deg, #b71c1c 0%, #e53935 100%);
+    color: white;
+    padding: 18px 0;
+    box-shadow: 0 4px 20px rgba(183,28,28,0.25);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+}
+
+.nav-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-brand {
+    font-size: 26px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    letter-spacing: -0.5px;
+}
+
+.logo {
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
+    animation: logoPulse 3s ease-in-out infinite;
+}
+
+@keyframes logoPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.nav-user {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 8px 16px;
+    border-radius: 50px;
+    backdrop-filter: blur(10px);
+}
+
+.btn-logout {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 10px 24px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-logout:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Dashboard Container */
+.dashboard-container {
+    max-width: 1400px;
+    margin: 32px auto;
+    padding: 0 24px;
+}
+
+/* Tabs */
+.tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 32px;
+    background: white;
+    border-radius: 16px;
+    padding: 8px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    overflow-x: auto;
+    scrollbar-width: thin;
+}
+
+.tabs::-webkit-scrollbar {
+    height: 6px;
+}
+
+.tabs::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 3px;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    padding: 14px 24px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #718096;
+    cursor: pointer;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+}
+
+.tab-btn:hover {
+    background: #f7fafc;
+    color: #b71c1c;
+}
+
+.tab-btn.active {
+    background: linear-gradient(135deg, #b71c1c 0%, #e53935 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(183,28,28, 0.4);
+}
+
+.tab-icon {
+    font-size: 20px;
+}
+
+.status-icon {
+    display: inline-flex;
+    width: 14px;
+    height: 14px;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+}
+
+.badge {
+    background: #fc5c65;
+    color: white;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 22px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* Tab Content */
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.tab-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.tab-header h2 {
+    font-size: 32px;
+    font-weight: 800;
+    color: #2d3748;
+    letter-spacing: -0.5px;
+}
+
+.filter-group {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* Status Sub-tabs */
+.status-tabs {
+    display: flex;
+    gap: 8px;
+    padding: 20px 20px 0 20px;
+    overflow-x: auto;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.status-tab {
+    padding: 12px 24px;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    position: relative;
+    top: 2px;
+}
+
+.status-tab:hover {
+    color: #b71c1c;
+    background: rgba(183,28,28, 0.05);
+}
+
+.status-tab.active {
+    color: #b71c1c;
+    border-bottom-color: #b71c1c;
+    background: rgba(183,28,28, 0.05);
+}
+
+.search-input {
+    padding: 12px 18px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 14px;
+    min-width: 280px;
+    flex: 1;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #b71c1c;
+    box-shadow: 0 0 0 4px rgba(183,28,28, 0.1);
+}
+
+.filter-select {
+    padding: 12px 18px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 14px;
+    cursor: pointer;
+    background: white;
+    font-weight: 600;
+    color: #4a5568;
+    transition: all 0.3s ease;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #b71c1c;
+}
+
+.btn-refresh,
+.btn-primary {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-refresh {
+    background: white;
+    color: #4a5568;
+    border: 2px solid #e2e8f0;
+}
+
+.btn-refresh:hover {
+    background: #f7fafc;
+    border-color: #cbd5e0;
+    transform: translateY(-2px);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #b71c1c 0%, #e53935 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(183,28,28, 0.4);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(183,28,28, 0.5);
+}
+
+/* Cases List */
+.cases-list,
+.notifications-list {
+    display: grid;
+    gap: 16px;
+}
+
+/* Cards */
+.case-card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.case-card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    transform: translateY(-4px);
+}
+
+/* Status-specific card accents (subtle border on hover) */
+.case-card.status-pending:hover { border-color: #f6c85f; box-shadow: 0 12px 30px rgba(246,200,95,0.12); }
+.case-card.status-active:hover { border-color: #e53935; box-shadow: 0 12px 30px rgba(229,57,53,0.12); }
+.case-card.status-discharged:hover { border-color: #00b894; box-shadow: 0 12px 30px rgba(0,184,148,0.12); }
+.case-card.status-transferred:hover { border-color: #6c5ce7; box-shadow: 0 12px 30px rgba(108,92,231,0.12); }
+.case-card.status-deceased:hover { border-color: #6b6b6b; box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+
+.case-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 20px;
+}
+
+.case-id {
+    font-size: 20px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #b71c1c 0%, #e53935 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.status-badge {
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.status-pending { background: linear-gradient(135deg, #fff4d6 0%, #fde3a6 100%); color: #5a3b00; }
+.status-active { background: linear-gradient(135deg, #ff6b6b 0%, #e53935 100%); color: white; }
+.status-discharged { background: linear-gradient(135deg, #b7f5d8 0%, #56d19a 100%); color: #0b4f2a; }
+.status-transferred { background: linear-gradient(135deg, #e6e0ff 0%, #cfc2ff 100%); color: #3b2b7a; }
+.status-deceased { background: linear-gradient(135deg, #efefef 0%, #d1d1d1 100%); color: #262626; }
+
+.case-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.info-label {
+    font-size: 11px;
+    color: #a0aec0;
+    margin-bottom: 6px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.case-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 20px;
+    border-top: 2px solid #f7fafc;
+}
+
+.triage-badge {
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.triage-red { background: linear-gradient(135deg, #ff4d4f 0%, #e53935 100%); color: white; }
+.triage-yellow { background: linear-gradient(135deg, #ffd166 0%, #f6c85f 100%); color: #3b2b00; }
+.triage-green { background: linear-gradient(135deg, #9be7a5 0%, #56d19a 100%); color: #064e3b; }
+.triage-black { background: linear-gradient(135deg, #424242 0%, #212121 100%); color: white; }
+
+.attachment-count {
+    font-size: 14px;
+    color: #718096;
+    font-weight: 600;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    overflow: auto;
+    animation: fadeIn 0.2s ease;
+}
+
+.modal-content {
+    background: white;
+    margin: 40px auto;
+    padding: 40px;
+    border-radius: 24px;
+    max-width: 960px;
+    width: 92%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(40px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #b71c1c 0%, #e53935 100%);
+    border-radius: 4px;
+}
+
+.close {
+    position: absolute;
+    right: 24px;
+    top: 24px;
+    font-size: 32px;
+    font-weight: bold;
+    color: #cbd5e0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #f7fafc;
+}
+
+.close:hover {
+    color: #fc5c65;
+    background: #fee;
+    transform: rotate(90deg);
+}
+
+/* Ensure the modal status badge isn't covered by the close button. Give the badge
+   some right spacing and bring it above the close button when necessary. */
+.detail-header .status-badge {
+    margin-right: 72px; /* space to keep clear of top-right close button */
+    position: relative;
+    z-index: 2; /* place above the close button if they overlap */
+}
+
+/* Case Detail */
+.detail-header {
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 3px solid #f7fafc;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.detail-title {
+    font-size: 28px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #b71c1c 0%, #e53935 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.detail-section {
+    margin-bottom: 32px;
+    background: #f7fafc;
+    padding: 24px;
+    border-radius: 16px;
+}
+
+.detail-section h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.detail-label {
+    font-size: 12px;
+    color: #a0aec0;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.detail-value {
+    font-size: 16px;
+    color: #2d3748;
+    font-weight: 600;
+}
+
+.vitals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 20px;
+}
+
+.attachments-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.attachment-item {
+    border: 3px solid #e2e8f0;
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.attachment-item:hover {
+    border-color: #b71c1c;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(183,28,28, 0.3);
+}
+
+.attachment-item img,
+.attachment-item video {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+}
+
+.attachment-info {
+    padding: 12px;
+    background: #f7fafc;
+}
+
+.attachment-link {
+    display: inline-block;
+    color: #b71c1c;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.attachment-link:hover {
+    text-decoration: underline;
+}
+
+.status-update {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.status-select {
+    padding: 12px 18px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 14px;
+    flex: 1;
+    min-width: 200px;
+    font-weight: 600;
+}
+
+.btn-update {
+    padding: 12px 32px;
+    background: linear-gradient(135deg, #b71c1c 0%, #e53935 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(183,28,28, 0.4);
+}
+
+.btn-update:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(183,28,28, 0.5);
+}
+
+.loading {
+    text-align: center;
+    padding: 60px;
+    color: #a0aec0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    color: #a0aec0;
+}
+
+.empty-state-icon {
+    font-size: 72px;
+    margin-bottom: 24px;
+    opacity: 0.6;
+}
+
+.empty-state-text {
+    font-size: 20px;
+    font-weight: 700;
+    color: #718096;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .dashboard-container {
+        padding: 0 20px;
+    }
+    
+    .detail-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .nav-brand {
+        font-size: 20px;
+    }
+    
+    .user-info {
+        display: none;
+    }
+
+    .tab-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .tab-header h2 {
+        font-size: 24px;
+    }
+    
+    .filter-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .search-input {
+        min-width: 100%;
+    }
+
+    .case-info,
+    .detail-grid,
+    .vitals-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .attachments-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .tabs {
+        gap: 4px;
+        padding: 6px;
+    }
+
+    .tab-btn {
+        padding: 12px 16px;
+        font-size: 13px;
+    }
+
+    .modal-content {
+        width: 96%;
+        padding: 24px;
+        margin: 20px auto;
+        border-radius: 16px;
+    }
+    
+    .detail-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .case-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .status-update {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .status-select,
+    .btn-update {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-container {
+        padding: 0 12px;
+        margin: 20px auto;
+    }
+    
+    .nav-container {
+        padding: 0 16px;
+    }
+    
+    .nav-brand {
+        font-size: 18px;
+    }
+    
+    .btn-logout {
+        padding: 8px 16px;
+        font-size: 12px;
+    }
+    
+    .tab-header h2 {
+        font-size: 20px;
+    }
+    
+    .case-card {
+        padding: 16px;
+    }
+    
+    .detail-section {
+        padding: 16px;
+    }
+    
+    .modal-content {
+        padding: 20px;
+    }
+}
+
+/* Navbar */
+.navbar {
+    background: linear-gradient(135deg, #b71c1c 0%, #e53935 100%);
+    color: white;
+    padding: 15px 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.nav-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-brand {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.nav-user {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.btn-logout {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid white;
+    padding: 8px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s;
+}
+
+.btn-logout:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Dashboard Container */
+.dashboard-container {
+    max-width: 1400px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+/* Tabs */
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #e0e0e0;
+    overflow-x: auto;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 15px 25px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #666;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.tab-btn:hover {
+    color: #b71c1c;
+}
+
+.tab-btn.active {
+    color: #b71c1c;
+    border-bottom-color: #b71c1c;
+}
+
+.tab-icon {
+    font-size: 20px;
+}
+
+.badge {
+    background: #ff4444;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    min-width: 20px;
+    text-align: center;
+}
+
+/* Tab Content */
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.tab-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.tab-header h2 {
+    font-size: 28px;
+    color: #333;
+}
+
+.filter-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.search-input {
+    padding: 10px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    min-width: 250px;
+    flex: 1;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #b71c1c;
+}
+
+.filter-select {
+    padding: 10px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.btn-refresh,
+.btn-primary {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-refresh {
+    background: #f0f0f0;
+    color: #333;
+}
+
+.btn-refresh:hover {
+    background: #e0e0e0;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #b71c1c 0%, #e53935 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(183, 28, 28, 0.4);
+}
+
+/* Cards */
+.case-card,
+.rescuer-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.case-card:hover,
+.rescuer-card:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.case-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 15px;
+}
+
+.case-id {
+    font-size: 18px;
+    font-weight: 700;
+    color: #b71c1c;
+}
+
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-pending { background: linear-gradient(135deg, #fff4d6 0%, #fde3a6 100%); color: #5a3b00; }
+.status-active { background: linear-gradient(135deg, #ff6b6b 0%, #e53935 100%); color: white; }
+.status-discharged { background: linear-gradient(135deg, #b7f5d8 0%, #56d19a 100%); color: #0b4f2a; }
+.status-transferred { background: linear-gradient(135deg, #e6e0ff 0%, #cfc2ff 100%); color: #3b2b7a; }
+.status-deceased { background: linear-gradient(135deg, #efefef 0%, #d1d1d1 100%); color: #262626; }
+
+.case-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.info-label {
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 3px;
+}
+
+.info-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+}
+
+.case-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 15px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.triage-badge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.triage-red { background: linear-gradient(135deg, #ff4d4f 0%, #e53935 100%); color: white; }
+.triage-yellow { background: linear-gradient(135deg, #ffd166 0%, #f6c85f 100%); color: #3b2b00; }
+.triage-green { background: linear-gradient(135deg, #9be7a5 0%, #56d19a 100%); color: #064e3b; }
+.triage-black { background: linear-gradient(135deg, #424242 0%, #212121 100%); color: white; }
+
+.attachment-count {
+    font-size: 14px;
+    color: #666;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    overflow: auto;
+}
+
+.modal-content {
+    background: white;
+    margin: 50px auto;
+    padding: 30px;
+    border-radius: 12px;
+    max-width: 900px;
+    width: 90%;
+    max-height: 85vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+.close {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #aaa;
+    cursor: pointer;
+}
+
+.close:hover {
+    color: #333;
+}
+
+/* Case Detail */
+.detail-header {
+    margin-bottom: 30px;
+}
+
+.detail-title {
+    font-size: 24px;
+    color: #b71c1c;
+    margin-bottom: 10px;
+}
+
+.detail-section {
+    margin-bottom: 25px;
+}
+
+.detail-section h3 {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.detail-label {
+    font-size: 13px;
+    color: #999;
+    font-weight: 600;
+}
+
+.detail-value {
+    font-size: 15px;
+    color: #333;
+}
+
+.vitals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.attachments-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.attachment-item {
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.3s;
+}
+
+.attachment-item:hover {
+    border-color: #b71c1c;
+}
+
+.attachment-item img,
+.attachment-item video {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+.attachment-info {
+    padding: 10px;
+    background: #f9f9f9;
+}
+
+.attachment-link {
+    display: inline-block;
+    color: #b71c1c;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.attachment-link:hover {
+    text-decoration: underline;
+}
+
+.status-update {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 15px;
+}
+
+.status-select {
+    padding: 10px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    flex: 1;
+}
+
+.btn-update {
+    padding: 10px 25px;
+    background: #b71c1c;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-update:hover {
+    background: #e53935;
+}
+
+/* Forms */
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #2d3748;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #b71c1c;
+    box-shadow: 0 0 0 4px rgba(183,28,28, 0.1);
+}
+
+.form-group small {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    color: #a0aec0;
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 32px;
+}
+
+.btn-cancel {
+    padding: 12px 32px;
+    background: white;
+    color: #4a5568;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel:hover {
+    background: #f7fafc;
+    transform: translateY(-2px);
+}
+
+.btn-save {
+    padding: 12px 32px;
+    background: linear-gradient(135deg, #b71c1c 0%, #e53935 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(183,28,28, 0.4);
+}
+
+.btn-save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(183,28,28, 0.5);
+}
+
+.btn-save:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-delete {
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #fc5c65 0%, #eb3349 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(252, 92, 101, 0.3);
+}
+
+.btn-delete:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(252, 92, 101, 0.5);
+}
+
+.loading {
+    text-align: center;
+    padding: 40px;
+    color: #999;
+    font-size: 16px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+}
+
+.empty-state-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+}
+
+.empty-state-text {
+    font-size: 18px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .nav-brand {
+        font-size: 18px;
+    }
+
+    .tab-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .case-info,
+    .detail-grid,
+    .vitals-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .tabs {
+        gap: 5px;
+    }
+
+    .tab-btn {
+        padding: 12px 15px;
+        font-size: 14px;
+    }
+
+    .modal-content {
+        width: 95%;
+        padding: 20px;
+        margin: 20px auto;
+    }
+}
+
+    </style>
+    <style>
+    /* Safety: force case card backgrounds to white to avoid accidental full-card coloring */
+    .cases-list .case-card, .notifications-list .case-card, .case-card { background: white !important; }
+    /* Also make sure status-specific cards don't get full-card backgrounds */
+    .case-card.status-pending, .case-card.status-active, .case-card.status-discharged, .case-card.status-transferred, .case-card.status-deceased { background: white !important; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <img class="logo" src="assets/logo.png" alt="PHEC logo" width="48" height="48" style="border-radius:6px; object-fit:cover;" />
+                <span>PHEC - Pre-hospital Emergency Care</span>
+            </div>
+            <div class="nav-user">
+                <div class="user-info">
+                    <span>👤</span>
+                    <span id="userName">Loading...</span>
+                </div>
+                <button id="logoutBtn" class="btn-logout">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="notifications">
+                <span class="tab-icon">🔔</span>
+                Notifications
+                <span class="badge" id="notifBadge">0</span>
+            </button>
+            <button class="tab-btn" data-tab="cases">
+                <span class="tab-icon">📋</span>
+                Cases
+            </button>
+            <button class="tab-btn" data-tab="rescuers">
+                <span class="tab-icon">👥</span>
+                Rescuers
+            </button>
+        </div>
+
+        <!-- Notifications Tab -->
+        <div class="tab-content active" id="notifications">
+            <div class="tab-header">
+                <h2>🔔 New Case Notifications</h2>
+                <button class="btn-refresh" id="refreshNotif">↻ Refresh</button>
+            </div>
+            <div class="notifications-list" id="notificationsList">
+                <div class="loading">Loading notifications...</div>
+            </div>
+        </div>
+
+        <!-- Cases Tab -->
+        <div class="tab-content" id="cases">
+            <div class="tab-header">
+                <h2>📋 Cases</h2>
+                <div class="filter-group">
+                    <input type="text" id="searchInput" class="search-input" placeholder="🔎 Search by patient name, case ID...">
+                    <button class="btn-refresh" id="sortToggle" title="Toggle sort order">⬆️ Newest First</button>
+                    <button class="btn-refresh" id="refreshCases">↻ Refresh</button>
+                </div>
+            </div>
+            
+            <!-- Status Sub-tabs -->
+            <div class="status-tabs">
+                <button class="status-tab active" data-status="">📁 All Cases</button>
+                <button class="status-tab" data-status="active">🔴 Active</button>
+                <button class="status-tab" data-status="discharged">✅ Discharged</button>
+                <button class="status-tab" data-status="transferred">🔁 Transferred</button>
+                <button class="status-tab" data-status="deceased">
+                    <span class="status-icon" aria-hidden="true">
+                        <svg width="14" height="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true">
+                            <circle cx="12" cy="12" r="8" fill="#262626" />
+                        </svg>
+                    </span>
+                    Deceased
+                </button>
+            </div>
+            
+            <div class="cases-list" id="casesList">
+                <div class="loading">Loading cases...</div>
+            </div>
+        </div>
+
+        <!-- Rescuers Tab -->
+        <div class="tab-content" id="rescuers">
+            <div class="tab-header">
+                <h2>👥 Manage Rescuers</h2>
+                <button class="btn-primary" onclick="showAddRescuerInstructions()">➕ Add New Rescuer</button>
+            </div>
+            <div class="cases-list" id="rescuersList">
+                <div class="loading">Loading rescuers...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Case Detail Modal -->
+    <div id="caseModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="caseDetail"></div>
+        </div>
+    </div>
+
+    <!-- Add Rescuer Instructions Modal -->
+    <div id="addRescuerModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddRescuerModal()">&times;</span>
+            <h2 style="color: #b71c1c; margin-bottom: 20px;">➕ Add New Rescuer</h2>
+            
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; border-left: 4px solid #b71c1c; margin-bottom: 20px;">
+                <p style="margin: 0; color: #2c3e50; font-size: 15px;">
+                    <strong>ℹ️ Instructions:</strong> Create a new rescuer account to allow emergency responders to submit cases from the mobile app.
+                </p>
+            </div>
+
+            <div style="background: #d4edda; padding: 20px; border-radius: 12px; border-left: 4px solid #28a745; margin-bottom: 20px;">
+                <div style="font-size: 16px; font-weight: 700; margin-bottom: 12px; color: #155724;">⚡ Create Rescuer Account</div>
+                <p style="margin: 0 0 12px 0; color: #155724; font-size: 14px;">
+                    Fill in the rescuer's details below and share the credentials with them.
+                </p>
+                
+                <form id="quickRescuerForm" style="margin-top: 12px;">
+                    <div class="form-group">
+                        <label for="quickRescuerName">Full Name *</label>
+                        <input type="text" id="quickRescuerName" required placeholder="e.g. Juan Dela Cruz">
+                        <small style="color: #666;">Enter the rescuer's complete name</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="quickRescuerEmail">Email *</label>
+                        <input type="email" id="quickRescuerEmail" required placeholder="e.g. rescuer@email.com">
+                        <small style="color: #666;">This will be used for login to the mobile app</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="quickRescuerPassword">Password *</label>
+                        <input type="password" id="quickRescuerPassword" required minlength="6" placeholder="Minimum 6 characters">
+                        <small style="color: #666;">Share this password with the rescuer for their first login</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="quickRescuerPhone">Phone Number</label>
+                        <input type="tel" id="quickRescuerPhone" placeholder="e.g. 09171234567">
+                        <small style="color: #666;">Optional - rescuer's contact number</small>
+                    </div>
+                    <button type="submit" class="btn-save" style="width: 100%;">➕ Create Rescuer Account</button>
+                </form>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn-cancel" onclick="closeAddRescuerModal()" style="padding: 12px 32px;">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Rescuer Modal -->
+    <div id="editRescuerModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditRescuerModal()">&times;</span>
+            <h2 style="color: #b71c1c; margin-bottom: 20px;">✏️ Edit Rescuer</h2>
+            
+            <form id="editRescuerForm">
+                <input type="hidden" id="editRescuerUid">
+                
+                <div class="form-group">
+                    <label for="editRescuerName">Full Name *</label>
+                    <input type="text" id="editRescuerName" required>
+                </div>
+                <div class="form-group">
+                    <label for="editRescuerEmail">Email *</label>
+                    <input type="email" id="editRescuerEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="editRescuerPhone">Phone Number</label>
+                    <input type="tel" id="editRescuerPhone">
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="closeEditRescuerModal()">Cancel</button>
+                    <button type="submit" class="btn-save">💾 Save Changes</button>
+                </div>
+            </form>
+        </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <script>
+        // ============================================
+        // Firebase Configuration
+        // ============================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBwRVw9Fo5Z8Se1eoXBbWTqVF4UBrTLFrk",
+            authDomain: "phecsystem.firebaseapp.com",
+            projectId: "phecsystem",
+            storageBucket: "phecsystem.firebasestorage.app",
+            messagingSenderId: "883720407447",
+            appId: "1:883720407447:web:0e08865bf2b8f3881d9cd2"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let currentUser = null;
+        let casesListener = null;
+        let isCreatingRescuer = false; // Flag to prevent auth state redirect during rescuer creation
+        let isLoadingCases = false; // Flag to prevent multiple simultaneous loads
+
+    // Development preview bypass: set ?dev=1 in the URL, or open from localhost/file:// to avoid redirecting to login
+    const _urlParams = new URLSearchParams(window.location.search || '');
+    const DEV_BYPASS = _urlParams.get('dev') === '1' || location.hostname === 'localhost' || location.protocol === 'file:';
+
+        // ============================================
+        // Authentication Check
+        // ============================================
+        auth.onAuthStateChanged(async (user) => {
+            // Dev bypass: allow preview without a logged-in user when DEV_BYPASS is true
+            if (!user) {
+                if (DEV_BYPASS) {
+                    console.warn('DEV_BYPASS active: continuing without Firebase auth (some features may be limited)');
+                    // show a non-blocking banner so testers know they are in dev preview mode
+                    try {
+                        const b = document.createElement('div');
+                        b.style.cssText = 'position:fixed;bottom:16px;left:16px;background:#fff3cd;border:1px solid #ffeeba;padding:10px 14px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.08);color:#856404;z-index:2000;font-weight:700;';
+                        b.innerText = 'DEV PREVIEW - not authenticated. Use ?dev=1 for local preview.';
+                        document.body.appendChild(b);
+                    } catch (e) { /* ignore DOM errors */ }
+                    // initialize dashboard UI without user-specific features
+                    initializeDashboard();
+                    return;
+                }
+
+                // Don't redirect if we're in the middle of creating a rescuer
+                if (!isCreatingRescuer) {
+                    window.location.href = 'login-firebase.html';
+                }
+                return;
+            }
+            
+            // Skip role check if we're creating a rescuer (will re-auth shortly)
+            if (isCreatingRescuer) {
+                console.log('Skipping auth check - creating rescuer...');
+                return;
+            }
+            
+            // Verify user role
+            try {
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                
+                if (!userDoc.exists) {
+                    console.error('User document not found');
+                    await auth.signOut();
+                    alert('User profile not found. Please contact administrator.');
+                    window.location.href = 'login-firebase.html';
+                    return;
+                }
+                
+                const userData = userDoc.data();
+                const role = userData?.role;
+                
+                console.log('Dashboard - User role:', role);
+                
+                if (role !== 'hospital_staff') {
+                    console.error('Access denied - not hospital staff');
+                    await auth.signOut();
+                    alert('Access denied. Only hospital staff can access this dashboard.');
+                    window.location.href = 'login-firebase.html';
+                    return;
+                }
+                
+                currentUser = user;
+                const userNameElement = document.getElementById('userName');
+                if (userNameElement && userData) {
+                    userNameElement.textContent = userData.name || user.email;
+                }
+                
+                // Initialize after auth and role verification
+                initializeDashboard();
+            } catch (error) {
+                console.error('Error verifying user role:', error);
+                // Don't redirect if we're in the middle of creating a rescuer
+                if (!isCreatingRescuer) {
+                    await auth.signOut();
+                    window.location.href = 'login-firebase.html';
+                }
+            }
+        });
+
+        function initializeDashboard() {
+            initializeTabs();
+            initializeModals();
+            loadNotifications();
+            loadCases();
+            loadRescuers();
+            setupFirestoreListener();
+            setupStatusTabs();
+        }
+
+        // Setup status tab event listeners
+        function setupStatusTabs() {
+            document.querySelectorAll('.status-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Remove active class from all tabs
+                    document.querySelectorAll('.status-tab').forEach(t => t.classList.remove('active'));
+                    // Add active class to clicked tab
+                    this.classList.add('active');
+                    // Update filter and display
+                    currentStatusFilter = this.dataset.status;
+                    displayCases();
+                });
+            });
+        }
+
+        // ============================================
+        // Logout
+        // ============================================
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            try {
+                await auth.signOut();
+                window.location.href = 'login-firebase.html';
+            } catch (error) {
+                console.error('Logout failed:', error);
+                alert('Logout failed: ' + error.message);
+            }
+        });
+
+        // ============================================
+        // Tab Management
+        // ============================================
+        function initializeTabs() {
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tabName = btn.dataset.tab;
+                    
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    btn.classList.add('active');
+                    document.getElementById(tabName).classList.add('active');
+                });
+            });
+        }
+
+        // ============================================
+        // Modal Management
+        // ============================================
+        function initializeModals() {
+            const modals = document.querySelectorAll('.modal');
+            const closeBtns = document.querySelectorAll('.close');
+            
+            closeBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    modals.forEach(modal => modal.style.display = 'none');
+                });
+            });
+            
+            window.addEventListener('click', (e) => {
+                if (e.target.classList.contains('modal')) {
+                    e.target.style.display = 'none';
+                }
+            });
+        }
+
+        // ============================================
+        // Real-time Firestore Listener
+        // ============================================
+        let casesUnsubscribers = []; // Store unsubscribe functions
+        
+        function setupFirestoreListener() {
+            // Clear existing listeners
+            casesUnsubscribers.forEach(unsub => unsub());
+            casesUnsubscribers = [];
+            
+            // Listen for ALL case statuses in real-time
+            const statuses = ['pending', 'active', 'discharged', 'transferred', 'deceased'];
+            
+            statuses.forEach(status => {
+                const unsubscribe = db.collection('cases')
+                    .where('status', '==', status)
+                    .onSnapshot((snapshot) => {
+                        snapshot.docChanges().forEach((change) => {
+                            if (change.type === 'added') {
+                                const caseData = change.doc.data();
+                                const sentAt = caseData.sentAt?.toDate();
+                                const now = new Date();
+                                const diffSeconds = (now - sentAt) / 1000;
+                                
+                                // Show notification for new pending cases
+                                if (status === 'pending' && diffSeconds < 10) {
+                                    showNotification('New case received: ' + change.doc.id);
+                                    loadNotifications();
+                                    updateNotificationBadge();
+                                }
+                            }
+                        });
+                        
+                        // Reload cases whenever any status changes
+                        loadCases();
+                    }, (error) => {
+                        console.error('Firestore listener error:', error);
+                    });
+                
+                casesUnsubscribers.push(unsubscribe);
+            });
+        }
+
+        // ============================================
+        // Browser Notifications
+        // ============================================
+        function showNotification(message) {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification('PHEC - Pre-hospital Emergency Care', {
+                    body: message,
+                    icon: '/favicon.ico'
+                });
+            }
+        }
+
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+
+        // ============================================
+        // Load Notifications (Pending Cases)
+        // ============================================
+        async function loadNotifications() {
+            const container = document.getElementById('notificationsList');
+            container.innerHTML = '<div class="loading">Loading notifications...</div>';
+            
+            try {
+                console.log('ℹ️ Loading notifications - querying Firestore for pending cases...');
+                
+                // Only pending cases - no index needed (use lowercase to match mobile app)
+                const snapshot = await db.collection('cases')
+                    .where('status', '==', 'pending')
+                    .get();
+                
+                console.log(`ℹ️ Found ${snapshot.size} pending cases`);
+                
+                // Sort client-side by sentAt
+                const cases = [];
+                snapshot.forEach(doc => {
+                    console.log('ℹ️ Case:', doc.id, doc.data());
+                    cases.push({ id: doc.id, data: doc.data() });
+                });
+                
+                cases.sort((a, b) => {
+                    const aTime = a.data.sentAt?.toDate() || new Date(0);
+                    const bTime = b.data.sentAt?.toDate() || new Date(0);
+                    return bTime - aTime;
+                });
+                
+                if (cases.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📭</div>
+                            <div class="empty-state-text">No pending cases</div>
+                            <p style="margin-top: 10px; color: #999; font-size: 14px;">
+                                Cases sent from rescuers will be displayed here
+                            </p>
+                        </div>
+                    `;
+                    updateNotificationBadge(0);
+                    return;
+                }
+                
+                container.innerHTML = '';
+                updateNotificationBadge(cases.length);
+                
+                cases.forEach(({ id, data }) => {
+                    const card = createCaseCard(id, data, true);
+                    container.appendChild(card);
+                });
+            } catch (error) {
+                console.error('❌ Error loading notifications:', error);
+                container.innerHTML = `<div class="loading">Error: ${error.message}<br><small>Check browser console (F12) for details</small></div>`;
+            }
+        }
+
+        // ============================================
+        // Update Notification Badge
+        // ============================================
+        function updateNotificationBadge(count) {
+            const badge = document.getElementById('notifBadge');
+            if (count === undefined) {
+                db.collection('cases')
+                    .where('status', '==', 'pending')
+                    .get()
+                    .then(snapshot => {
+                        badge.textContent = snapshot.size;
+                    });
+            } else {
+                badge.textContent = count;
+            }
+        }
+
+        // ============================================
+        // Load All Cases (Exclude Pending)
+        // ============================================
+        let allCases = []; // Store all cases for search
+        let sortNewestFirst = true; // Sort order toggle
+        let currentStatusFilter = ''; // Current status filter from tabs
+
+        async function loadCases() {
+            // Prevent multiple simultaneous loads
+            if (isLoadingCases) {
+                console.log('⚠️ Already loading cases, skipping...');
+                return;
+            }
+            
+            isLoadingCases = true;
+            const container = document.getElementById('casesList');
+            
+            container.innerHTML = '<div class="loading">Loading cases...</div>';
+            
+            try {
+                // Get all non-pending cases
+                const statuses = ['active', 'discharged', 'transferred', 'deceased'];
+                const promises = statuses.map(status => 
+                    db.collection('cases').where('status', '==', status).get()
+                );
+                
+                const snapshots = await Promise.all(promises);
+                
+                // Combine all results
+                allCases = [];
+                snapshots.forEach(snapshot => {
+                    snapshot.forEach(doc => {
+                        allCases.push({ id: doc.id, data: doc.data() });
+                    });
+                });
+                
+                console.log(`ℹ️ Loaded ${allCases.length} cases`);
+                
+                // Sort by sentAt
+                sortCases();
+                
+                // Apply search and filter
+                displayCases();
+            } catch (error) {
+                console.error('❌ Error loading cases:', error);
+                container.innerHTML = `<div class="loading">Error: ${error.message}</div>`;
+            } finally {
+                isLoadingCases = false;
+            }
+        }
+
+        function sortCases() {
+            allCases.sort((a, b) => {
+                const aTime = a.data.sentAt?.toDate() || new Date(0);
+                const bTime = b.data.sentAt?.toDate() || new Date(0);
+                return sortNewestFirst ? (bTime - aTime) : (aTime - bTime);
+            });
+        }
+
+        function toggleSort() {
+            sortNewestFirst = !sortNewestFirst;
+            const btn = document.getElementById('sortToggle');
+            btn.textContent = sortNewestFirst ? '⬆️ Newest First' : '⬇️ Oldest First';
+            console.log(`🔀 Sort order: ${sortNewestFirst ? 'Newest First' : 'Oldest First'}`);
+            sortCases();
+            displayCases();
+        }
+
+        function displayCases() {
+            console.log('🔍 displayCases() called');
+            const container = document.getElementById('casesList');
+            if (!container) {
+                console.error('❌ Container #casesList not found!');
+                return;
+            }
+            console.log('ℹ️ Container found:', container);
+            
+            const statusFilter = currentStatusFilter; // Use the tab filter
+            const searchEl = document.getElementById('searchInput');
+            const searchTerm = (searchEl && searchEl.value || '').toLowerCase().trim();
+            
+            console.log(`🔍 Filtering cases - Status: "${statusFilter}", Search: "${searchTerm}"`);
+            console.log(`ℹ️ Total cases before filter: ${allCases.length}`);
+            
+            // If cases haven't loaded yet, show loading message
+            if (!allCases || allCases.length === 0) {
+                console.log('⚠️ No cases loaded yet, showing loading...');
+                container.innerHTML = '<div class="loading">Loading cases...</div>';
+                return;
+            }
+            
+            // Filter cases
+            let filteredCases = allCases;
+            
+            // Filter by status
+            if (statusFilter) {
+                filteredCases = filteredCases.filter(c => c.data.status === statusFilter);
+                console.log(`🔍 After status filter "${statusFilter}": ${filteredCases.length} cases`);
+            }
+            
+            // Filter by search term (search across multiple fields)
+            if (searchTerm) {
+                filteredCases = filteredCases.filter(c => {
+                    const caseId = (c.id || '').toString().toLowerCase();
+                    const patientName = (c.data.patientName || '').toLowerCase();
+                    const condition = (c.data.condition || '').toLowerCase();
+                    const triage = (c.data.triage || '').toLowerCase();
+                    const location = (c.data.location || '').toLowerCase();
+                    const interventions = (c.data.interventions || '').toLowerCase();
+                    const remarks = (c.data.remarks || '').toLowerCase();
+                    const contact = (c.data.contact || '').toLowerCase();
+
+                    const haystack = [caseId, patientName, condition, triage, location, interventions, remarks, contact].join(' ');
+                    return haystack.includes(searchTerm);
+                });
+                console.log(`🔍 After search filter "${searchTerm}": ${filteredCases.length} cases`);
+            }
+            
+            if (filteredCases.length === 0) {
+                console.log('ℹ️ No cases match the filter');
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <div class="empty-state-text">${searchTerm ? `No cases match "${searchTerm}"` : 'No cases yet'}</div>
+                    </div>
+                `;
+                // Force browser to repaint
+                container.style.display = 'none';
+                container.offsetHeight; // Trigger reflow
+                container.style.display = '';
+                return;
+            }
+            
+            console.log(`🧩 Rendering ${filteredCases.length} case cards...`);
+            container.innerHTML = '';
+            
+            filteredCases.forEach(({ id, data }) => {
+                const card = createCaseCard(id, data, false);
+                container.appendChild(card);
+            });
+            
+            // Force browser to repaint/reflow
+            container.style.display = 'none';
+            container.offsetHeight; // Trigger reflow
+            container.style.display = '';
+            
+            console.log(`ℹ️ Finished rendering ${filteredCases.length} cases to DOM`);
+        }
+
+        // ============================================
+        // Create Case Card
+        // ============================================
+        function createCaseCard(caseId, caseData, isNotification) {
+            const card = document.createElement('div');
+            // Add a status-specific class to allow per-status styling
+            const statusClass = caseData.status ? `status-${caseData.status.toLowerCase()}` : 'status-pending';
+            card.className = `case-card ${statusClass}`;
+
+            // Normalize triage into a canonical key and label for consistent display
+            const triageKey = getTriageColor(caseData.triage);
+            const triageLabel = getTriageLabel(caseData.triage);
+            
+            const sentAt = caseData.sentAt?.toDate();
+            const formattedDate = sentAt ? sentAt.toLocaleString() : 'N/A';
+            
+            const attachmentCount = caseData.attachments?.length || 0;
+            
+            card.innerHTML = `
+                <div class="case-header">
+                    <div class="case-id">${caseId}</div>
+                    <div class="status-badge status-${caseData.status?.toLowerCase()}">${caseData.status}</div>
+                </div>
+                <div class="case-info">
+                    <div class="info-item">
+                        <div class="info-label">Patient Name</div>
+                        <div class="info-value">${caseData.patientName || 'N/A'}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Age / Sex</div>
+                        <div class="info-value">${caseData.age !== null && caseData.age !== undefined ? caseData.age : 'Unknown'} / ${caseData.sex || 'Unknown'}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Condition</div>
+                        <div class="info-value">${(caseData.condition || 'N/A').substring(0, 50)}...</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Sent At</div>
+                        <div class="info-value">${formattedDate}</div>
+                    </div>
+                </div>
+                <div class="case-footer">
+                    <div class="triage-badge triage-${triageKey}" title="${caseData.triage || ''}">
+                        ${triageLabel}
+                    </div>
+                    <div class="attachment-count">📎 ${attachmentCount} attachment(s)</div>
+                </div>
+            `;
+            
+            card.addEventListener('click', () => {
+                openCaseDetail(caseId, caseData, isNotification);
+            });
+            
+            return card;
+        }
+
+        // ============================================
+        // Get Triage Color
+        // ============================================
+        function getTriageColor(triage) {
+            if (!triage) return 'green';
+            const t = triage.toLowerCase();
+            if (t.includes('red') || t.includes('immediate') || t.includes('critical')) return 'red';
+            if (t.includes('yellow') || t.includes('urgent') || t.includes('delayed')) return 'yellow';
+            if (t.includes('black') || t.includes('deceased') || t.includes('expectant')) return 'black';
+            return 'green';
+        }
+
+        // ============================================
+        // Get Triage Label
+        // Returns a human-friendly descriptive label for triage
+        // Keep CSS classes triage-red/triage-yellow/triage-green for coloring only.
+        // ============================================
+        function getTriageLabel(triage) {
+            if (!triage) return 'Green - Minor (Stable)';
+            const t = triage.toLowerCase();
+            if (t.includes('red') || t.includes('immediate') || t.includes('critical') || t.includes('p1') || t.includes('priority 1')) return 'Red - Immediate (Life-Threatening)';
+            if (t.includes('yellow') || t.includes('urgent') || t.includes('delayed') || t.includes('p2') || t.includes('priority 2')) return 'Yellow - Delayed (Serious)';
+            if (t.includes('black') || t.includes('deceased') || t.includes('expectant')) return 'Black - Deceased';
+            return 'Green - Minor (Stable)';
+        }
+
+        // ============================================
+        // Open Case Detail Modal
+        // ============================================
+        async function openCaseDetail(caseId, caseData, fromNotification) {
+            const modal = document.getElementById('caseModal');
+            const detailDiv = document.getElementById('caseDetail');
+            
+            // If from notification, check triage to determine initial status
+            if (fromNotification && caseData.status === 'pending') {
+                const triageKey = getTriageColor(caseData.triage);
+                // If triage is deceased/black, set status to deceased
+                const newStatus = triageKey === 'black' ? 'deceased' : 'active';
+                await updateCaseStatus(caseId, newStatus);
+                caseData.status = newStatus;
+                loadNotifications();
+                loadCases();
+            }
+            
+            const attachmentsHTML = await generateAttachmentsHTML(caseData.attachments || []);
+
+            // Fetch rescuer details
+            let rescuerName = 'Unknown';
+            if (caseData.rescuerUid) {
+                try {
+                    const rescuerDoc = await db.collection('users').doc(caseData.rescuerUid).get();
+                    if (rescuerDoc.exists) {
+                        rescuerName = rescuerDoc.data().name || rescuerDoc.data().username || 'Unknown';
+                    }
+                } catch (error) {
+                    console.error('Error fetching rescuer details:', error);
+                }
+            }
+
+            // Normalize triage for consistent display in detail view
+            const detailTriageKey = getTriageColor(caseData.triage);
+            const detailTriageLabel = getTriageLabel(caseData.triage);
+            
+            detailDiv.innerHTML = `
+                <div class="detail-header">
+                    <h2 class="detail-title">${caseId}</h2>
+                    <div class="status-badge status-${caseData.status?.toLowerCase()}">${caseData.status}</div>
+                </div>
+                
+                <div class="detail-section">
+                    <h3>🩺 Patient Information</h3>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="detail-label">Full Name</div>
+                            <div class="detail-value">${caseData.patientName || 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Age</div>
+                            <div class="detail-value">${caseData.age !== null && caseData.age !== undefined ? caseData.age : 'Unknown'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Sex</div>
+                            <div class="detail-value">${caseData.sex || 'Unknown'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Contact</div>
+                            <div class="detail-value">${caseData.contact || 'Unknown'}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <h3>⚕️ Triage & Condition</h3>
+                    <div class="detail-grid">
+                            <div class="detail-item">
+                                <div class="detail-label">Triage Category</div>
+                                <div class="detail-value">
+                                    <span class="triage-badge triage-${detailTriageKey}" title="${caseData.triage || ''}">${detailTriageLabel}</span>
+                                    ${caseData.triage ? `<small style="display:block; color:#666; margin-top:6px;">Original: ${caseData.triage}</small>` : ''}
+                                </div>
+                            </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Chief Complaint / Condition</div>
+                            <div class="detail-value">${caseData.condition || 'N/A'}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <h3>❤️ Vitals</h3>
+                    <div class="vitals-grid">
+                        <div class="detail-item">
+                            <div class="detail-label">Blood Pressure</div>
+                            <div class="detail-value">${caseData.vitals?.bp || 'N/A'} mmHg</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Heart Rate</div>
+                            <div class="detail-value">${caseData.vitals?.hr || 'N/A'} bpm</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Respiratory Rate</div>
+                            <div class="detail-value">${caseData.vitals?.rr || 'N/A'} /min</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Temperature</div>
+                            <div class="detail-value">${caseData.vitals?.temp || 'N/A'} °C</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">SpO2</div>
+                            <div class="detail-value">${caseData.vitals?.spo2 || 'N/A'} %</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <h3>🚑 Pre-Hospital Care</h3>
+                    <div class="detail-item">
+                        <div class="detail-label">Interventions</div>
+                        <div class="detail-value">${caseData.interventions || 'None recorded'}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Remarks</div>
+                        <div class="detail-value">${caseData.remarks || 'None'}</div>
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <h3>📎 Attachments</h3>
+                    ${attachmentsHTML}
+                </div>
+                
+                <div class="detail-section">
+                    <h3>🏥 Hospital Information</h3>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="detail-label">Sent By</div>
+                            <div class="detail-value">${rescuerName}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Location</div>
+                            <div class="detail-value">${caseData.location || 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Sent At</div>
+                            <div class="detail-value">${caseData.sentAt?.toDate().toLocaleString() || 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Received At</div>
+                            <div class="detail-value">${caseData.receivedAt?.toDate().toLocaleString() || 'Not yet received'}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="status-update">
+                        <select class="status-select" id="statusSelect" ${caseData.status === 'deceased' ? 'disabled' : ''}>
+                            <option value="active" ${caseData.status === 'active' ? 'selected' : ''}>Active</option>
+                            <option value="discharged" ${caseData.status === 'discharged' ? 'selected' : ''}>Discharged</option>
+                            <option value="transferred" ${caseData.status === 'transferred' ? 'selected' : ''}>Transferred</option>
+                            <option value="deceased" ${caseData.status === 'deceased' ? 'selected' : ''}>Deceased</option>
+                        </select>
+                        <button class="btn-update" onclick="saveStatusUpdate('${caseId}')" ${caseData.status === 'deceased' ? 'disabled' : ''}>Update Status</button>
+                        ${caseData.status === 'deceased' ? '<div style="color: #666; font-size: 14px; margin-top: 8px;">⚠️ Status cannot be changed for deceased cases</div>' : ''}
+                    </div>
+                </div>
+            `;
+            
+            modal.style.display = 'block';
+        }
+
+        // ============================================
+        // Generate Attachments HTML
+        // ============================================
+        async function generateAttachmentsHTML(attachments) {
+            if (!attachments || attachments.length === 0) {
+                return '<div class="detail-value">No attachments</div>';
+            }
+            
+            let html = '<div class="attachments-grid">';
+            
+            for (const attachment of attachments) {
+                const url = attachment.remoteUrl || attachment.url;
+                const mimeType = attachment.mimeType || '';
+                const isVideo = mimeType.startsWith('video/');
+                const isImage = mimeType.startsWith('image/');
+                
+                html += `<div class="attachment-item">`;
+                
+                if (isImage) {
+                    const thumbnailUrl = url.replace('/upload/', '/upload/w_300,h_200,c_fill/');
+                    html += `<a href="${url}" target="_blank">
+                                <img src="${thumbnailUrl}" alt="Attachment" />
+                             </a>`;
+                } else if (isVideo) {
+                    html += `<video controls>
+                                <source src="${url}" type="${mimeType}">
+                                Your browser does not support video playback.
+                             </video>`;
+                } else {
+                    html += `<div style="padding: 20px; text-align: center;">📄 File</div>`;
+                }
+                
+                html += `<div class="attachment-info">
+                            <a href="${url}" target="_blank" class="attachment-link">View Full Size</a>
+                         </div>
+                      </div>`;
+            }
+            
+            html += '</div>';
+            return html;
+        }
+
+
+        // ============================================
+        // Update Case Status
+        // ============================================
+        async function updateCaseStatus(caseId, newStatus) {
+            try {
+                await db.collection('cases').doc(caseId).update({
+                    status: newStatus,
+                    receivedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                console.log(`✅ Updated case ${caseId} status to: ${newStatus}`);
+                return true;
+            } catch (error) {
+                console.error('❌ Error updating status:', error);
+                return false;
+            }
+        }
+
+        // ============================================
+        // Save Status Update
+        // ============================================
+        async function saveStatusUpdate(caseId) {
+            const newStatus = document.getElementById('statusSelect').value;
+            
+            if (!newStatus) {
+                alert('⚠️ Please select a status');
+                return;
+            }
+            
+            console.log(`🔁 Updating case ${caseId} to status: ${newStatus}`);
+            const success = await updateCaseStatus(caseId, newStatus);
+            
+            if (success) {
+                alert('✅ Status updated successfully!');
+                document.getElementById('caseModal').style.display = 'none';
+                loadNotifications();
+                loadCases();
+            } else {
+                alert('❌ Failed to update status. Please check console for errors.');
+            }
+        }
+
+        // ============================================
+        // Rescuer Management
+        // ============================================
+        let allRescuers = [];
+        let editingRescuerId = null;
+
+        async function loadRescuers() {
+            const container = document.getElementById('rescuersList');
+            container.innerHTML = '<div class="loading">Loading rescuers...</div>';
+            
+            try {
+                const snapshot = await db.collection('users')
+                    .where('role', '==', 'rescuer')
+                    .get();
+                
+                allRescuers = [];
+                snapshot.forEach(doc => {
+                    allRescuers.push({ id: doc.id, data: doc.data() });
+                });
+                
+                console.log(`👥 Found ${allRescuers.length} rescuers`);
+                displayRescuers();
+            } catch (error) {
+                console.error('❌ Error loading rescuers:', error);
+                container.innerHTML = `<div class="loading">Error: ${error.message}</div>`;
+            }
+        }
+
+        function displayRescuers() {
+            const container = document.getElementById('rescuersList');
+            
+            if (allRescuers.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <div class="empty-state-text">No rescuers yet</div>
+                        <p style="margin-top: 10px; color: #999; font-size: 14px;">
+                            Click "Add New Rescuer" to create rescuer accounts
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            allRescuers.forEach(({ id, data }) => {
+                const card = document.createElement('div');
+                card.className = 'case-card';
+                
+                card.innerHTML = `
+                    <div class="case-header">
+                        <div style="flex: 1;">
+                            <div style="font-size: 20px; font-weight: 700; color: #2c3e50; margin-bottom: 4px;">
+                                👤 ${data.name || 'Unnamed Rescuer'}
+                            </div>
+                            <div style="font-size: 14px; color: #7f8c8d;">
+                                ${data.email || 'No email provided'}
+                            </div>
+                        </div>
+                        <div class="status-badge status-active">Rescuer</div>
+                    </div>
+                    <div class="case-info">
+                        <div class="info-item">
+                            <div class="info-label">📞 Phone</div>
+                            <div class="info-value">${data.phone || 'N/A'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">🗓️ Created</div>
+                            <div class="info-value">${data.createdAt ? data.createdAt.toDate().toLocaleDateString() : 'N/A'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">🆔 User ID</div>
+                            <div class="info-value" style="font-size: 12px; font-family: monospace;">${id.substring(0, 12)}...</div>
+                        </div>
+                    </div>
+                    <div class="case-footer">
+                        <button class="btn-primary" onclick="editRescuer('${id}')" style="padding: 8px 16px; font-size: 14px;">✏️ Edit</button>
+                        <button class="btn-delete" onclick="deleteRescuer('${id}', '${data.name || data.email}')">🗑️ Delete</button>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        function deleteRescuer(rescuerId, rescuerName) {
+            if (!confirm(`🗑️ Delete rescuer "${rescuerName}"?`)) {
+                return;
+            }
+            
+            db.collection('users').doc(rescuerId).delete()
+                .then(() => {
+                    alert('✅ Rescuer deleted successfully!');
+                    loadRescuers();
+                })
+                .catch(error => {
+                    console.error('❌ Error deleting rescuer:', error);
+                    alert('❌ Error: ' + error.message);
+                });
+        }
+
+        function editRescuer(rescuerId) {
+            const rescuer = allRescuers.find(r => r.id === rescuerId);
+            if (!rescuer) return;
+            
+            // Open edit modal with rescuer data
+            document.getElementById('editRescuerUid').value = rescuerId;
+            document.getElementById('editRescuerName').value = rescuer.data.name || '';
+            document.getElementById('editRescuerEmail').value = rescuer.data.email || '';
+            document.getElementById('editRescuerPhone').value = rescuer.data.phone || '';
+            document.getElementById('editRescuerModal').style.display = 'block';
+        }
+
+        function showAddRescuerInstructions() {
+            document.getElementById('addRescuerModal').style.display = 'block';
+        }
+
+        function closeAddRescuerModal() {
+            document.getElementById('addRescuerModal').style.display = 'none';
+            const manualForm = document.getElementById('manualRescuerForm');
+            if (manualForm) manualForm.reset();
+            const quickForm = document.getElementById('quickRescuerForm');
+            if (quickForm) quickForm.reset();
+        }
+
+        function closeEditRescuerModal() {
+            document.getElementById('editRescuerModal').style.display = 'none';
+            const editForm = document.getElementById('editRescuerForm');
+            if (editForm) editForm.reset();
+        }
+
+        // Handle quick rescuer creation (creates Auth + Firestore)
+        document.getElementById('quickRescuerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('quickRescuerName').value.trim();
+            const email = document.getElementById('quickRescuerEmail').value.trim();
+            const password = document.getElementById('quickRescuerPassword').value;
+            const phone = document.getElementById('quickRescuerPhone').value.trim();
+            
+            if (!name || !email || !password) {
+                alert('⚠️ Please fill in all required fields');
+                return;
+            }
+            
+            if (password.length < 6) {
+                alert('⚠️ Password must be at least 6 characters');
+                return;
+            }
+            
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Creating account...';
+            
+            try {
+                // Store current user info
+                const hospitalStaffEmail = currentUser.email;
+                const hospitalStaffPassword = prompt('Please enter YOUR password to confirm:\n(This is needed to sign back in after creating the rescuer account)');
+                
+                if (!hospitalStaffPassword) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '➕ Create Rescuer Account';
+                    return;
+                }
+                
+                // Set flag to prevent auth state change handler from redirecting
+                isCreatingRescuer = true;
+                
+                // Create the rescuer auth account
+                const rescuerCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const rescuerUid = rescuerCredential.user.uid;
+                
+                // Create Firestore profile for rescuer
+                await db.collection('users').doc(rescuerUid).set({
+                    name: name,
+                    email: email,
+                    phone: phone,
+                    role: 'rescuer',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                });
+                
+                // Sign out the rescuer and sign back in as hospital staff
+                await auth.signOut();
+                await auth.signInWithEmailAndPassword(hospitalStaffEmail, hospitalStaffPassword);
+                
+                // Reset flag
+                isCreatingRescuer = false;
+                
+                alert(`✅ Rescuer account created successfully!\n\nLogin credentials:\nEmail: ${email}\nPassword: ${password}\n\nPlease share these credentials with the rescuer.`);
+                closeAddRescuerModal();
+                loadRescuers();
+                
+            } catch (error) {
+                // Reset flag on error
+                isCreatingRescuer = false;
+                
+                console.error('❌ Error creating rescuer:', error);
+                let errorMessage = error.message;
+                
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMessage = 'This email is already registered. Please use a different email.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'Invalid email address.';
+                } else if (error.code === 'auth/weak-password') {
+                    errorMessage = 'Password is too weak. Use at least 6 characters.';
+                } else if (error.code === 'auth/wrong-password') {
+                    errorMessage = 'Incorrect hospital staff password. Account creation cancelled.';
+                }
+                
+                alert('❌ Error: ' + errorMessage);
+                
+                // Try to sign back in as hospital staff if something went wrong
+                try {
+                    const hospitalStaffEmail = currentUser?.email;
+                    if (!currentUser && hospitalStaffEmail) {
+                        const pwd = prompt('Please enter your password to sign back in:');
+                        if (pwd) {
+                            await auth.signInWithEmailAndPassword(hospitalStaffEmail, pwd);
+                        }
+                    }
+                } catch (reAuthError) {
+                    console.error('Re-authentication error:', reAuthError);
+                    alert('⚠️ Please sign in again as hospital staff.');
+                    window.location.href = 'login-firebase.html';
+                }
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '➕ Create Rescuer Account';
+            }
+        });
+
+        // Handle manual rescuer creation (Step 2: Add Firestore profile)
+        const manualRescuerForm = document.getElementById('manualRescuerForm');
+        if (manualRescuerForm) {
+            manualRescuerForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const uid = document.getElementById('manualRescuerUid').value.trim();
+                const name = document.getElementById('manualRescuerName').value.trim();
+                const email = document.getElementById('manualRescuerEmail').value.trim();
+                const phone = document.getElementById('manualRescuerPhone').value.trim();
+                
+                if (!uid || !name || !email) {
+                    alert('⚠️ Please fill in all required fields');
+                    return;
+                }
+                
+                try {
+                    await db.collection('users').doc(uid).set({
+                    name: name,
+                    email: email,
+                    phone: phone,
+                    role: 'rescuer',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                });
+                
+                alert('✅ Rescuer profile created successfully!\n\nThe rescuer can now login to the mobile app with:\nEmail: ' + email + '\nPassword: (the one you set in Firebase Console)');
+                closeAddRescuerModal();
+                loadRescuers();
+            } catch (error) {
+                console.error('❌ Error creating rescuer profile:', error);
+                alert('❌ Error: ' + error.message);
+            }
+            });
+        }
+
+        // Handle rescuer edit
+        const editRescuerForm = document.getElementById('editRescuerForm');
+        if (editRescuerForm) {
+            editRescuerForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+            
+            const uid = document.getElementById('editRescuerUid').value;
+            const name = document.getElementById('editRescuerName').value.trim();
+            const email = document.getElementById('editRescuerEmail').value.trim();
+            const phone = document.getElementById('editRescuerPhone').value.trim();
+            
+            try {
+                await db.collection('users').doc(uid).update({
+                    name: name,
+                    email: email,
+                    phone: phone,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                });
+                
+                alert('✅ Rescuer profile updated successfully!');
+                closeEditRescuerModal();
+                loadRescuers();
+            } catch (error) {
+                console.error('❌ Error updating rescuer:', error);
+                alert('❌ Error: ' + error.message);
+            }
+            });
+        }
+
+        // Make functions globally accessible
+        window.editRescuer = editRescuer;
+        window.deleteRescuer = deleteRescuer;
+        window.showAddRescuerInstructions = showAddRescuerInstructions;
+        window.closeAddRescuerModal = closeAddRescuerModal;
+        window.closeEditRescuerModal = closeEditRescuerModal;
+
+        // ============================================
+        // Event Listeners
+        // ============================================
+        document.getElementById('refreshNotif').addEventListener('click', loadNotifications);
+        document.getElementById('refreshCases').addEventListener('click', loadCases);
+        document.getElementById('sortToggle').addEventListener('click', toggleSort);
+        
+        // Search with debounce and enter key
+        let searchTimeout;
+        const searchEl = document.getElementById('searchInput');
+        if (searchEl) {
+            searchEl.addEventListener('input', () => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    console.log('🔎 Search triggered by input, calling displayCases()');
+                    displayCases();
+                }, 300); // Wait 300ms after user stops typing
+            });
+
+            searchEl.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    clearTimeout(searchTimeout);
+                    console.log('🔎 Search triggered by Enter key, calling displayCases()');
+                    displayCases();
+                }
+            });
+        }
+
+        // Make saveStatusUpdate globally accessible
+        window.saveStatusUpdate = saveStatusUpdate;
+    </script>
+    <script>
+        // Defensive: ensure triage-* classes are only on the badge, not on the full card.
+        // Some older templates or external scripts occasionally add triage classes to the
+        // card container which causes the whole card to pick up the triage background.
+        // This script strips triage-* classes from .case-card elements and watches for
+        // future additions so the UI remains white-backed.
+        (function enforceCardBackgrounds() {
+            const stripTriageFromCard = (el) => {
+                if (!el || !el.classList) return;
+                const toRemove = Array.from(el.classList).filter(c => c.startsWith('triage-'));
+                toRemove.forEach(c => el.classList.remove(c));
+            };
+
+            // Strip existing cards
+            document.querySelectorAll('.case-card').forEach(stripTriageFromCard);
+
+            // Watch for future additions inside cases/notifications containers
+            const containers = [document.getElementById('casesList'), document.getElementById('notificationsList')].filter(Boolean);
+            const mo = new MutationObserver(muts => {
+                muts.forEach(m => {
+                    m.addedNodes && m.addedNodes.forEach(node => {
+                        if (node.nodeType !== 1) return;
+                        if (node.classList && node.classList.contains('case-card')) stripTriageFromCard(node);
+                        // also check descendants
+                        node.querySelectorAll && node.querySelectorAll('.case-card').forEach(stripTriageFromCard);
+                    });
+                });
+            });
+
+            containers.forEach(c => mo.observe(c, { childList: true, subtree: true }));
+            // As a final safety, run periodically for a short while in case of race conditions
+            let attempts = 0;
+            const interval = setInterval(() => {
+                document.querySelectorAll('.case-card').forEach(stripTriageFromCard);
+                if (++attempts > 10) clearInterval(interval);
+            }, 300);
+        })();
+    </script>
+</body>
+</html>
+
+
+

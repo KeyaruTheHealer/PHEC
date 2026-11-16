@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PHEC Hospital - Dashboard</title>
+    <link rel="stylesheet" href="/assets/dashboard.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">🏥 PHEC Hospital</div>
+            <div class="nav-user">
+                <span id="userName">Loading...</span>
+                <button id="logoutBtn" class="btn-logout">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="notifications">
+                <span class="tab-icon">🔔</span>
+                Notifications
+                <span class="badge" id="notifBadge">0</span>
+            </button>
+            <button class="tab-btn" data-tab="cases">
+                <span class="tab-icon">📋</span>
+                Cases
+            </button>
+            <button class="tab-btn" data-tab="rescuers">
+                <span class="tab-icon">👥</span>
+                Rescuers
+            </button>
+        </div>
+
+        <!-- Notifications Tab -->
+        <div class="tab-content active" id="notifications">
+            <div class="tab-header">
+                <h2>📢 New Case Notifications</h2>
+                <button class="btn-refresh" id="refreshNotif">🔄 Refresh</button>
+            </div>
+            <div class="notifications-list" id="notificationsList">
+                <div class="loading">Loading notifications...</div>
+            </div>
+        </div>
+
+        <!-- Cases Tab -->
+        <div class="tab-content" id="cases">
+            <div class="tab-header">
+                <h2>📋 All Cases</h2>
+                <div class="filter-group">
+                    <select id="statusFilter" class="filter-select">
+                        <option value="">All Status</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Active">Active</option>
+                        <option value="Discharged">Discharged</option>
+                        <option value="Transferred">Transferred</option>
+                        <option value="Deceased">Deceased</option>
+                    </select>
+                    <button class="btn-refresh" id="refreshCases">🔄 Refresh</button>
+                </div>
+            </div>
+            <div class="cases-list" id="casesList">
+                <div class="loading">Loading cases...</div>
+            </div>
+        </div>
+
+        <!-- Rescuers Tab -->
+        <div class="tab-content" id="rescuers">
+            <div class="tab-header">
+                <h2>👥 Rescuer Management</h2>
+                <button class="btn-primary" id="addRescuerBtn">➕ Add Rescuer</button>
+            </div>
+            <div class="rescuers-list" id="rescuersList">
+                <div class="loading">Loading rescuers...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Case Detail Modal -->
+    <div id="caseModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="caseDetail"></div>
+        </div>
+    </div>
+
+    <!-- Rescuer Form Modal -->
+    <div id="rescuerModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="rescuerForm"></div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <!-- App assets (use absolute /assets/ path so local server and caching behave predictably) -->
+    <script src="/assets/dashboard.js"></script>
+</body>
+</html>
+

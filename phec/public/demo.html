@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PHEC Hospital - Demo (No Backend)</title>
+    <link rel="stylesheet" href="../assets/dashboard.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">🏥 PHEC Hospital</div>
+            <div class="nav-user">
+                <span>Demo Mode - Admin User</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="notifications">
+                <span class="tab-icon">🔔</span>
+                Notifications
+                <span class="badge" id="notifBadge">0</span>
+            </button>
+            <button class="tab-btn" data-tab="cases">
+                <span class="tab-icon">📋</span>
+                Cases
+            </button>
+            <button class="tab-btn" data-tab="rescuers">
+                <span class="tab-icon">👥</span>
+                Rescuers
+            </button>
+        </div>
+
+        <!-- Notifications Tab -->
+        <div class="tab-content active" id="notifications">
+            <div class="tab-header">
+                <h2>📢 New Case Notifications</h2>
+            </div>
+            <div class="empty-state">
+                <div class="empty-state-icon">⚙️</div>
+                <div class="empty-state-text">
+                    <strong>Demo Mode - No Backend Connection</strong>
+                    <p style="margin-top: 10px; color: #666;">
+                        To see real data, please install XAMPP and configure Firebase as described in SETUP.md
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cases Tab -->
+        <div class="tab-content" id="cases">
+            <div class="tab-header">
+                <h2>📋 All Cases</h2>
+            </div>
+            <div class="empty-state">
+                <div class="empty-state-icon">⚙️</div>
+                <div class="empty-state-text">
+                    <strong>Demo Mode - No Backend Connection</strong>
+                    <p style="margin-top: 10px; color: #666;">
+                        Install XAMPP and configure Firebase to see cases from the mobile app
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rescuers Tab -->
+        <div class="tab-content" id="rescuers">
+            <div class="tab-header">
+                <h2>👥 Rescuer Management</h2>
+            </div>
+            <div class="empty-state">
+                <div class="empty-state-icon">⚙️</div>
+                <div class="empty-state-text">
+                    <strong>Demo Mode - No Backend Connection</strong>
+                    <p style="margin-top: 10px; color: #666;">
+                        Install XAMPP and setup MySQL to manage rescuer accounts
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching only
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabName = btn.dataset.tab;
+                
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                
+                btn.classList.add('active');
+                document.getElementById(tabName).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
+
